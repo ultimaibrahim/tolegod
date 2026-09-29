@@ -21,25 +21,20 @@ def _(mo):
     mo.md(r"""
     # Matemáticas Aplicadas a Ciencia de Datos: Examen 1 — Versión 2
 
-    **Alumno:** Saúl Ibrahim García Morales  
-    **Licenciatura en Ciencia de Datos e Inteligencia Artificial**  
-    **Profesor:** Iván Alejandro Toledano Juárez  
-    **Semestre:** 2026B — Aula N 105
-
-    ## Contexto
-
-    Vamos a utilizar el dataset **mpg (Auto MPG)** que contiene información sobre automóviles de finales de los años 70 y principios de los 80. El dataset incluye variables técnicas y de rendimiento.
+    Vamos a utilizar el dataset **mpg (Miles Per Gallon)** que contiene información sobre automóviles fabricados entre 1970 y 1982. El dataset incluye características técnicas de los vehículos como consumo de combustible, número de cilindros, potencia, peso y aceleración.
 
     **Variables principales:**
-    - `mpg`: Millas por galón (eficiencia de combustible)
-    - `cylinders`: Número de cilindros (3, 4, 5, 6, 8)
-    - `displacement`: Desplazamiento del motor (pulgadas cúbicas)
+    - `acceleration`: Tiempo de aceleración de 0 a 60 mph en segundos (8.0 - 24.8)
+    - `mpg`: Millas por galón (consumo de combustible)
+    - `cylinders`: Número de cilindros (4, 6, 8)
+    - `displacement`: Cilindrada del motor (pulgadas cúbicas)
     - `horsepower`: Caballos de fuerza
-    - `weight`: Peso del automóvil (libras)
-    - `acceleration`: Tiempo para acelerar de 0 a 60 mph (**segundos**) - **Variable objetivo**
-    - `model_year`: Año del modelo (1970-1982)
-    - `origin`: Origen (1: USA, 2: Europa, 3: Japón)
-    - `name`: Nombre del modelo
+    - `weight`: Peso del vehículo (libras)
+    - `model_year`: Año del modelo (70-82)
+    - `origin`: Origen (usa, europe, japan)
+    - `name`: Nombre del vehículo
+
+    **Alumno:** SAÚL IBRAHIM GARCÍA MORALES
     """)
     return
 
@@ -62,15 +57,9 @@ def _():
 @app.cell
 def _(pd):
     # Cargar el dataset
-    import os
     url = "https://raw.githubusercontent.com/IvTole/Matematicas_Aplicadas_Ciencia_De_Datos_CUGDL/refs/heads/main/data/cars/mpg.csv"
     try:
-        if os.path.exists("variantes_cars/mpg.csv"):
-            df = pd.read_csv("variantes_cars/mpg.csv")
-        elif os.path.exists("mpg.csv"):
-            df = pd.read_csv("mpg.csv")
-        else:
-            df = pd.read_csv(url)
+        df = pd.read_csv("mpg.csv")
     except Exception:
         df = pd.read_csv(url)
     df.head()
@@ -84,13 +73,11 @@ def _(mo):
 
     Se añaden algunas funciones que los ayudarán a resolver los ejercicios relacionados con distribución gaussiana.
 
-    Recuerda que el z-valor puede ser calculado a partir de los datos originales $x$, y viceversa, a partir de la fórmula de estandarización:
+    Recuerda que el z-valor puede ser calculado a partir de los datos originales $x$, y viceversa, a partir de las siguientes ecuaciones:
 
-    $$z = \frac{x-\mu}{\sigma} \quad \Longleftrightarrow \quad x = \mu + z \cdot \sigma$$
+    $$z = \frac{x-\mu}{\sigma}; \quad x = z\sigma + \mu \tag{1}$$
 
-    - Si quieres calcular el área acumulada **hasta un cierto punto** $z$, utiliza la función `area_cdf(z)`.
-    - Si quieres calcular el área **entre dos puntos** $z_1$ y $z_2$, utiliza `area_between(z1, z2)`.
-    - Si quieres calcular el área acumulada **desde un cierto punto** $z$ (cola derecha), utiliza `area_cdf_c(z)`.
+    Recuerda que puedes utilizar el método `stats.norm.cdf(z)` de scipy para calcular la CDF (área bajo la curva) a partir de un valor $z$, además de calcular un valor $z$ a partir de una CDF con `stats.norm.ppf(cdf)`. El método `stats.norm.pdf(z, loc, scale)` sirve para evaluar un valor $z$ en la distribución.
     """)
     return
 
@@ -101,49 +88,67 @@ def _(np, plt, stats):
     def area_cdf(z):
         x = np.arange(-10, z, 0.001)
         x_full = np.arange(-10, 10, 0.001)
-        plt.figure(figsize=(7, 3.5))
-        plt.plot(x_full, stats.norm.pdf(x_full, 0, 1), color='#2563eb', linewidth=2)
-        plt.fill_between(x, stats.norm.pdf(x, 0, 1), color='#3b82f6', alpha=0.5, label=f'Área acumulada (Z ≤ {z:.2f})')
-        plt.title(f"Distribución Acumulada hasta Z = {z:.2f}", fontsize=12)
-        plt.xlabel("Puntaje Z", fontsize=10)
-        plt.ylabel("Densidad N(0, 1)", fontsize=10)
-        plt.xlim(-4, 4)
-        plt.grid(True, linestyle=":", alpha=0.6)
-        plt.legend()
-        plt.tight_layout()
-        return plt.gca()
+        y = stats.norm.pdf(x, 0, 1)
+        y_full = stats.norm.pdf(x_full, 0, 1)
+        fig, ax = plt.subplots(figsize=(5, 3))
+        ax.plot(x_full, y_full)
+        ax.fill_between(x, y, 0, alpha=0.3, color='b')
+        ax.fill_between(x_full, y_full, 0, alpha=0.1)
+        ax.set_xlim([-5, 5])
+        ax.set_xlabel('z, # de desviaciones estandar con respecto de la media ')
+        ax.set_title('Distribución Normal Estándar')
+        plt.show()
+        area = stats.norm.cdf(z)
+        print(f'Area bajo la curva : {area}')
+        return area
 
+    return (area_cdf,)
+
+
+@app.cell
+def _(np, plt, stats):
+    ## Grafica el area bajo la curva entre dos puntos z
     def area_between(z1, z2):
         x = np.arange(z1, z2, 0.001)
         x_full = np.arange(-10, 10, 0.001)
-        plt.figure(figsize=(7, 3.5))
-        plt.plot(x_full, stats.norm.pdf(x_full, 0, 1), color='#2563eb', linewidth=2)
-        plt.fill_between(x, stats.norm.pdf(x, 0, 1), color='#10b981', alpha=0.5, label=f'Área entre [{z1:.2f}, {z2:.2f}]')
-        plt.title(f"Área bajo la curva entre Z1 = {z1:.2f} y Z2 = {z2:.2f}", fontsize=12)
-        plt.xlabel("Puntaje Z", fontsize=10)
-        plt.ylabel("Densidad N(0, 1)", fontsize=10)
-        plt.xlim(-4, 4)
-        plt.grid(True, linestyle=":", alpha=0.6)
-        plt.legend()
-        plt.tight_layout()
-        return plt.gca()
+        y = stats.norm.pdf(x, 0, 1)
+        y_full = stats.norm.pdf(x_full, 0, 1)
+        fig, ax = plt.subplots(figsize=(5, 3))
+        ax.plot(x_full, y_full)
+        ax.fill_between(x, y, 0, alpha=0.3, color='b')
+        ax.fill_between(x_full, y_full, 0, alpha=0.1)
+        ax.set_xlim([-5, 5])
+        ax.set_xlabel('z, # de desviaciones estandar con respecto de la media ')
+        ax.set_title('Distribución Normal Estándar')
+        plt.show()
+        area = stats.norm.cdf(z2) - stats.norm.cdf(z1)
+        print(f'Area bajo la curva : {area}')
+        return area
 
+    return (area_between,)
+
+
+@app.cell
+def _(np, plt, stats):
+    ## Grafica una distribucion acumulada complementaria hasta cierto punto z
     def area_cdf_c(z):
         x = np.arange(z, 10, 0.001)
         x_full = np.arange(-10, 10, 0.001)
-        plt.figure(figsize=(7, 3.5))
-        plt.plot(x_full, stats.norm.pdf(x_full, 0, 1), color='#2563eb', linewidth=2)
-        plt.fill_between(x, stats.norm.pdf(x, 0, 1), color='#ef4444', alpha=0.5, label=f'Área complementaria (Z ≥ {z:.2f})')
-        plt.title(f"Distribución Acumulada Complementaria desde Z = {z:.2f}", fontsize=12)
-        plt.xlabel("Puntaje Z", fontsize=10)
-        plt.ylabel("Densidad N(0, 1)", fontsize=10)
-        plt.xlim(-4, 4)
-        plt.grid(True, linestyle=":", alpha=0.6)
-        plt.legend()
-        plt.tight_layout()
-        return plt.gca()
+        y = stats.norm.pdf(x, 0, 1)
+        y_full = stats.norm.pdf(x_full, 0, 1)
+        fig, ax = plt.subplots(figsize=(5, 3))
+        ax.plot(x_full, y_full)
+        ax.fill_between(x, y, 0, alpha=0.3, color='b')
+        ax.fill_between(x_full, y_full, 0, alpha=0.1)
+        ax.set_xlim([-5, 5])
+        ax.set_xlabel('z, # de desviaciones estandar con respecto de la media ')
+        ax.set_title('Distribución Normal Estándar')
+        plt.show()
+        area = 1.0 - stats.norm.cdf(z)
+        print(f'Area bajo la curva : {area}')
+        return area
 
-    return area_between, area_cdf, area_cdf_c
+    return (area_cdf_c,)
 
 
 @app.cell(hide_code=True)
@@ -153,7 +158,7 @@ def _(mo):
 
     ### Medidas de Tendencia Central y Dispersión
 
-    Para la variable **acceleration (tiempo para acelerar de 0 a 60 mph)**:
+    Para la variable **acceleration (tiempo de aceleración 0-60 mph en segundos)**:
 
     **a) Calcula la media, mediana y moda**. Escribe también sus unidades correspondientes.
     """)
@@ -162,14 +167,14 @@ def _(mo):
 
 @app.cell
 def _(df):
-    media_acc = df["acceleration"].mean()
-    mediana_acc = df["acceleration"].median()
-    moda_acc = df["acceleration"].mode().iloc[0]
+    media = df['acceleration'].mean()
+    mediana = df['acceleration'].median()
+    moda = df['acceleration'].mode()
 
-    print(f"Media de acceleration:   {media_acc:.4f} segundos")
-    print(f"Mediana de acceleration: {mediana_acc:.4f} segundos")
-    print(f"Moda de acceleration:    {moda_acc:.4f} segundos")
-    return media_acc, mediana_acc, moda_acc
+    print(f"Media: {media:.2f} segundos")
+    print(f"Mediana: {mediana:.2f} segundos")
+    print(f"Moda: {moda[0]} segundos")
+    return media, mediana, moda
 
 
 @app.cell(hide_code=True)
@@ -182,18 +187,18 @@ def _(mo):
 
 @app.cell
 def _(df):
-    std_acc = df["acceleration"].std()
-    var_acc = df["acceleration"].var()
-    q1_acc = df["acceleration"].quantile(0.25)
-    q3_acc = df["acceleration"].quantile(0.75)
-    iqr_acc = q3_acc - q1_acc
+    desv_est = df['acceleration'].std()
+    varianza = df['acceleration'].var()
+    Q1 = df['acceleration'].quantile(0.25)
+    Q3 = df['acceleration'].quantile(0.75)
+    IQR = Q3 - Q1
 
-    print(f"Desviación estándar (s):     {std_acc:.4f} segundos")
-    print(f"Varianza (s²):               {var_acc:.4f} segundos²")
-    print(f"Primer Cuartil (Q1 - 25%):   {q1_acc:.4f} segundos")
-    print(f"Tercer Cuartil (Q3 - 75%):   {q3_acc:.4f} segundos")
-    print(f"Rango Intercuartílico (IQR): {iqr_acc:.4f} segundos")
-    return iqr_acc, q1_acc, q3_acc, std_acc, var_acc
+    print(f"Desviación Estándar: {desv_est:.2f} segundos")
+    print(f"Varianza: {varianza:.2f} segundos^2")
+    print(f"Cuartil 1: {Q1:.2f} segundos")
+    print(f"Cuartil 3: {Q3:.2f} segundos")
+    print(f"Rango Intercuartilico: {IQR:.2f} segundos")
+    return IQR, Q1, Q3, desv_est, varianza
 
 
 @app.cell(hide_code=True)
@@ -203,9 +208,7 @@ def _(mo):
 
     *Respuesta:*
 
-    el tiempo promedio que tardan los automóviles en acelerar de 0 a 60 mph es de **15.57 segundos**, con una mediana de **15.50 segundos** y una moda de **14.50 segundos**. la cercanía entre media y mediana indica que la mayor parte de los vehículos de la muestra tienen un comportamiento centrado en torno a los 15.5 segundos.
-
-    la dispersión es moderada: una desviación estándar de **2.76 segundos** y un rango intercuartílico de **3.35 segundos** reflejan que el 50% central de los automóviles registra tiempos de aceleración situados en la ventana de **13.83 a 17.18 segundos**. existe una variabilidad razonable derivada de las diferencias en cilindraje y potencia entre los modelos compactos y los sedanes pesados de la época.
+    Lo que yo puedo concluir de estos datos es que al ser la media y la mediana casi iguales (15.57 y 15.50 respectivamente) la distribucion es practicamente simétrica. Además, los cuartiles me indican que el 75% de los autos tienen una aceleración de 17.18 segundos o menos y el 25% tiene una aceleracion de 13.83 o menos. La desviación estándar de 2.76 segundos nos indica una dispersión moderada entre los autos.
     """)
     return
 
@@ -222,17 +225,10 @@ def _(mo):
 
 @app.cell
 def _(df, plt):
-    plt.figure(figsize=(8, 4.5))
-    plt.hist(df["acceleration"], bins=15, color="#3b82f6", edgecolor="black", alpha=0.7)
-    plt.axvline(df["acceleration"].mean(), color="#ef4444", linestyle="--", linewidth=2, label=f"Media: {df['acceleration'].mean():.2f} s")
-    plt.axvline(df["acceleration"].median(), color="#10b981", linestyle="-", linewidth=2, label=f"Mediana: {df['acceleration'].median():.2f} s")
-    plt.title("Histograma de Tiempo de Aceleración (0-60 mph) - 15 Bins", fontsize=13, fontweight="bold")
-    plt.xlabel("Tiempo de Aceleración (segundos)", fontsize=11)
-    plt.ylabel("Frecuencia (Automóviles)", fontsize=11)
-    plt.legend(frameon=True)
-    plt.grid(axis="y", linestyle=":", alpha=0.6)
-    plt.tight_layout()
-    plt.gca()
+    plt.hist(df['acceleration'], bins=10)
+    plt.ylabel('Cantidad')
+    plt.xlabel('Aceleración (segundos)')
+    plt.show()
     return
 
 
@@ -245,25 +241,9 @@ def _(mo):
 
 
 @app.cell
-def _(df, plt, sns):
-    plt.figure(figsize=(7.5, 3.5))
-    sns.boxplot(x=df["acceleration"], color="#93c5fd", flierprops=dict(marker="o", markerfacecolor="#ef4444", markersize=7))
-    plt.title("Boxplot de Acceleration (0-60 mph)", fontsize=13, fontweight="bold")
-    plt.xlabel("Aceleración (segundos)", fontsize=11)
-    plt.grid(axis="x", linestyle=":", alpha=0.6)
-    plt.tight_layout()
-    plt.gca()
-
-    # Identificación y conteo riguroso de outliers mediante la regla de Tukey 1.5 * IQR
-    q1 = df["acceleration"].quantile(0.25)
-    q3 = df["acceleration"].quantile(0.75)
-    iqr = q3 - q1
-    lim_inf = q1 - 1.5 * iqr
-    lim_sup = q3 + 1.5 * iqr
-    outliers = df[(df["acceleration"] < lim_inf) | (df["acceleration"] > lim_sup)]
-    print(f"Límites de Tukey: [{lim_inf:.4f}, {lim_sup:.4f}] segundos")
-    print(f"Cantidad total de outliers: {len(outliers)}")
-    print(f"Valores de outliers: {sorted(outliers['acceleration'].tolist())}")
+def _(df, plt):
+    plt.boxplot(df['acceleration'])
+    plt.show()
     return
 
 
@@ -272,9 +252,7 @@ def _(mo):
     mo.md(r"""
     *Respuesta:*
 
-    el boxplot revela la existencia de **7 outliers estadísticos** fuera de los bigotes calculados con la regla de tukey ($[8.80, 22.20]$ segundos):
-    - **3 outliers en la cola inferior** (automóviles de aceleración excepcionalmente rápida, tiempos menores a 8.80 s): `[8.0, 8.5, 8.5]` segundos.
-    - **4 outliers en la cola superior** (automóviles de aceleración muy lenta, tiempos mayores a 22.20 s): `[23.5, 23.7, 24.6, 24.8]` segundos.
+    Segun este boxplot hay aproximadamente 6 o 7 datos atípicos, que son los puntos que son mayores o menores al calculo de 1.5 x IQR. Hay 3 puntos por debajo del bigote inferior (autos muy rápidos con menos de 8.8 segundos) y 4 puntos por encima del bigote superior (autos muy lentos con más de 22.2 segundos).
     """)
     return
 
@@ -289,21 +267,10 @@ def _(mo):
 
 @app.cell
 def _(df, plt):
-    r_corr = df["weight"].corr(df["acceleration"])
-    plt.figure(figsize=(7.5, 4.5))
-    plt.scatter(df["weight"], df["acceleration"], color="#2563eb", alpha=0.55, edgecolors="none", s=40)
-    # Línea de tendencia lineal
-    m, b = np.polyfit(df["weight"], df["acceleration"], 1)
-    x_line = np.linspace(df["weight"].min(), df["weight"].max(), 200)
-    plt.plot(x_line, m * x_line + b, color="#dc2626", linestyle="--", linewidth=2, label=f"Tendencia lineal (r = {r_corr:.4f})")
-
-    plt.title(f"Relación entre Peso y Aceleración (r = {r_corr:.4f})", fontsize=13, fontweight="bold")
-    plt.xlabel("Peso del Automóvil (libras)", fontsize=11)
-    plt.ylabel("Tiempo de Aceleración 0-60 mph (segundos)", fontsize=11)
-    plt.legend()
-    plt.grid(True, linestyle=":", alpha=0.6)
-    plt.tight_layout()
-    plt.gca()
+    plt.scatter(df['weight'], df['acceleration'])
+    plt.xlabel('Peso (libras)')
+    plt.ylabel('Aceleración (segundos)')
+    plt.show()
     return
 
 
@@ -312,9 +279,7 @@ def _(mo):
     mo.md(r"""
     *Respuesta:*
 
-    se observa una **relación lineal negativa moderada** ($r = -0.4175$). a mayor peso del automóvil, el tiempo en segundos para alcanzar las 60 mph tiende a ser menor (es decir, aceleran más rápido en tiempo).
-
-    este fenómeno histórico en los automóviles de los años 70 se explica porque los vehículos más pesados estaban equipados con motores v8 de gran cilindrada y alto torque, lo que les permitía tiempos de aceleración más cortos a pesar de su masa, mientras que los compactos de 4 cilindros y bajo peso tenían motores pequeños y lentos.
+    En el scatter plot se puede observar que a un mayor peso la aceleración en segundos tiende a disminuir un poco (aceleran más rápido). Aunque hay una considerable dispersión entre los datos, se puede ver como la mayoría de puntos se concentran entre 2000 y 3500 de weight y 13 a 18 de acceleration.
     """)
     return
 
@@ -328,9 +293,7 @@ def _(mo):
 
     *Respuesta:*
 
-    la distribución de `acceleration` es **aproximadamente simétrica con una leve cola hacia la derecha (ligero sesgo positivo)**.
-
-    el histograma exhibe una típica forma acampanada con el cuerpo principal centrado de 14 a 17 segundos. no obstante, la presencia de 4 outliers con tiempos prolongados (hasta 24.8 s) alarga suavemente la cola derecha en comparación con la cola izquierda.
+    Considero que la distribucion es casi simétrica, talvez con un pequeño sesgo a la derecha, aunque es poco notorio. Esto debido a que la mayoría de los datos se distribuyen casi de la misma forma hacia ambos lados del centro, pero del lado derecho se alarga un poco por los autos que tardan más segundos.
     """)
     return
 
@@ -342,10 +305,7 @@ def _(mo):
 
     *Respuesta:*
 
-    - **media**: $15.5681$ segundos
-    - **mediana**: $15.5000$ segundos
-
-    la media y la mediana son **prácticamente idénticas** ($\Delta = 0.0681$ segundos, una diferencia relativa inferior al $0.4\%$). al cumplirse de forma casi exacta $\text{media} \approx \text{mediana}$ con una discrepancia mínima hacia arriba ($\text{media} > \text{mediana}$ por centésimas), se confirma que la distribución posee un alto grado de **simetría central**, con un sesgo positivo prácticamente despreciable.
+    Me indica que son simétricos, pues los valores de la media y la mediana son casi iguales (15.57 y 15.50 segundos).
     """)
     return
 
@@ -365,14 +325,12 @@ def _(mo):
 
 
 @app.cell
-def _(df):
-    mu_acc = df["acceleration"].mean()
-    sigma_acc = df["acceleration"].std()
-
-    print(f"Parámetro μ (Media estimada):                {mu_acc:.4f} segundos")
-    print(f"Parámetro σ (Desviación estándar estimada):  {sigma_acc:.4f} segundos")
-    print(f"Parámetro σ² (Varianza estimada):            {sigma_acc**2:.4f} segundos²")
-    return mu_acc, sigma_acc
+def _(desv_est, media):
+    mu = media
+    sigma = desv_est
+    print(f"mu = {mu:.2f}")
+    print(f"sigma = {sigma:.2f}")
+    return mu, sigma
 
 
 @app.cell(hide_code=True)
@@ -386,21 +344,13 @@ def _(mo):
 
 
 @app.cell
-def _(df, mu_acc, np, plt, sigma_acc, stats):
-    plt.figure(figsize=(8.5, 4.5))
-    plt.hist(df["acceleration"], bins=15, density=True, color="#93c5fd", edgecolor="black", alpha=0.6, label="Densidad empírica de acceleration")
-
-    x_range = np.linspace(df["acceleration"].min() - 2, df["acceleration"].max() + 2, 400)
-    pdf_curve = stats.norm.pdf(x_range, loc=mu_acc, scale=sigma_acc)
-    plt.plot(x_range, pdf_curve, color="#dc2626", linewidth=2.5, label=f"Modelo Gaussiano N(μ={mu_acc:.2f}, σ={sigma_acc:.2f})")
-
-    plt.title("Ajuste de Distribución Gaussiana sobre Tiempos de Aceleración", fontsize=13, fontweight="bold")
-    plt.xlabel("Tiempo de Aceleración (segundos)", fontsize=11)
-    plt.ylabel("Densidad de Probabilidad", fontsize=11)
-    plt.legend(frameon=True)
-    plt.grid(True, linestyle=":", alpha=0.5)
-    plt.tight_layout()
-    plt.gca()
+def _(df, mu, np, plt, sigma, stats):
+    dist = stats.norm(loc=mu, scale=sigma)
+    x = np.arange(7, 25, 0.1)
+    P_x = dist.pdf(x)
+    plt.hist(df['acceleration'], bins=15, density=True)
+    plt.plot(x, P_x)
+    plt.show()
     return
 
 
@@ -414,14 +364,8 @@ def _(mo):
 
 @app.cell
 def _(df, plt, stats):
-    plt.figure(figsize=(7.5, 4.5))
-    stats.probplot(df["acceleration"], dist="norm", plot=plt)
-    plt.title("Gráfico Q-Q Normal (Quantile-Quantile) para Acceleration", fontsize=13, fontweight="bold")
-    plt.xlabel("Cuantiles Teóricos Normales", fontsize=11)
-    plt.ylabel("Cuantiles Muestrales Observados (segundos)", fontsize=11)
-    plt.grid(True, linestyle=":", alpha=0.6)
-    plt.tight_layout()
-    plt.gca()
+    stats.probplot(df['acceleration'], dist="norm", plot=plt)
+    plt.show()
     return
 
 
@@ -430,9 +374,7 @@ def _(mo):
     mo.md(r"""
     *Respuesta:*
 
-    **sí, los datos siguen aproximadamente una distribución normal de manera muy satisfactoria**, notablemente mejor que variables con truncamiento o ceros.
-
-    en el gráfico q-q, la gran mayoría de las observaciones (entre los cuantiles teóricos -2.0 y +2.0) se alinean casi con exactitud sobre la recta teórica de 45°. las únicas divergencias menores ocurren en los extremos más alejados (cuantiles > 2.5), donde algunos vehículos lentos se dispersan ligeramente hacia arriba, pero el ajuste general es sólido y adecuado para modelado probabilístico.
+    Considero que si siguen una distribución normal. Como podemos ver en el grafico, los valores siguen casi a la perfeccion la recta roja a excepcion de unos pocos valores en la cola superior.
     """)
     return
 
@@ -450,15 +392,21 @@ def _(mo):
 
 
 @app.cell
-def _(area_cdf, mu_acc, sigma_acc, stats):
-    z_13 = (13 - mu_acc) / sigma_acc
-    prob_lt_13 = stats.norm.cdf(13, loc=mu_acc, scale=sigma_acc)
+def _(area_cdf, mu, sigma):
+    z_p1 = (13 - mu) / sigma
+    print(z_p1)
+    area_cdf(z_p1)
+    return (z_p1,)
 
-    print(f"Z-score para acceleration = 13 s: {z_13:.4f}")
-    print(f"Probabilidad P(acceleration < 13): {prob_lt_13:.4f} ({prob_lt_13 * 100:.2f}%)")
 
-    area_cdf(z_13)
-    return prob_lt_13, z_13
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    *Respuesta:*
+
+    La probabilidad de que un automovil tarde menos de 13 segundos es de aproximadamente 17.59% (area: 0.1759).
+    """)
+    return
 
 
 @app.cell(hide_code=True)
@@ -470,17 +418,21 @@ def _(mo):
 
 
 @app.cell
-def _(area_between, mu_acc, sigma_acc, stats):
-    z_15 = (15 - mu_acc) / sigma_acc
-    z_19 = (19 - mu_acc) / sigma_acc
-    prob_15_19 = stats.norm.cdf(19, loc=mu_acc, scale=sigma_acc) - stats.norm.cdf(15, loc=mu_acc, scale=sigma_acc)
+def _(area_between, mu, sigma):
+    z_p2_1 = (15 - mu) / sigma
+    z_p2_2 = (19 - mu) / sigma
+    area_between(z_p2_1, z_p2_2)
+    return z_p2_1, z_p2_2
 
-    print(f"Z-score para acceleration = 15 s: {z_15:.4f}")
-    print(f"Z-score para acceleration = 19 s: {z_19:.4f}")
-    print(f"Probabilidad P(15 ≤ acceleration ≤ 19): {prob_15_19:.4f} ({prob_15_19 * 100:.2f}%)")
 
-    area_between(z_15, z_19)
-    return prob_15_19, z_15, z_19
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    *Respuesta:*
+
+    La probabilidad de que un automovil tarde entre 15 y 19 segundos es del 47.49% (area: 0.4749).
+    """)
+    return
 
 
 @app.cell(hide_code=True)
@@ -492,12 +444,21 @@ def _(mo):
 
 
 @app.cell
-def _(mu_acc, sigma_acc, stats):
-    # El 20% con los mayores tiempos corresponde a la cola derecha: Percentil 80 (P80)
-    tiempo_limite_lento = stats.norm.ppf(0.80, loc=mu_acc, scale=sigma_acc)
-    print(f"Percentil 80 (P80 - Corte 20% más lento): {tiempo_limite_lento:.4f} segundos (~{tiempo_limite_lento:.2f} s)")
-    print(f"Interpretación: Un automóvil pertenece a la clasificación de aceleración lenta si tarda {tiempo_limite_lento:.2f} segundos o más.")
-    return (tiempo_limite_lento,)
+def _(mu, sigma, stats):
+    z_p3 = stats.norm().ppf(0.80)
+    x_p3 = mu + (z_p3 * sigma)
+    print(x_p3)
+    return x_p3, z_p3
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    *Respuesta:*
+
+    El tiempo limite para pertenecer a la clasificacion de aceleracion lenta (el 20% con mayores tiempos, percentil 80) es de 17.89 segundos. Los autos que tardan 17.89 segundos o mas son considerados lentos.
+    """)
+    return
 
 
 @app.cell(hide_code=True)
@@ -509,15 +470,20 @@ def _(mo):
 
 
 @app.cell
-def _(area_cdf_c, mu_acc, sigma_acc, stats):
-    z_17 = (17 - mu_acc) / sigma_acc
-    prob_gt_17 = 1 - stats.norm.cdf(17, loc=mu_acc, scale=sigma_acc)
+def _(area_cdf_c, mu, sigma):
+    z_p4 = (17 - mu) / sigma
+    area_cdf_c(z_p4)
+    return (z_p4,)
 
-    print(f"Z-score para acceleration = 17 s: {z_17:.4f}")
-    print(f"Probabilidad P(acceleration > 17): {prob_gt_17:.4f} ({prob_gt_17 * 100:.2f}%)")
 
-    area_cdf_c(z_17)
-    return prob_gt_17, z_17
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    *Respuesta:*
+
+    La probabilidad de que un automovil tarde mas de 17 segundos es del 30.18% (area: 0.3018).
+    """)
+    return
 
 
 @app.cell(hide_code=True)
@@ -531,21 +497,22 @@ def _(mo):
 
 
 @app.cell
-def _(area_between, mu_acc, sigma_acc, stats):
-    z_13_ap = (13 - mu_acc) / sigma_acc
-    z_16_ap = (16 - mu_acc) / sigma_acc
-    prob_13_16 = stats.norm.cdf(16, loc=mu_acc, scale=sigma_acc) - stats.norm.cdf(13, loc=mu_acc, scale=sigma_acc)
-    n_lote = 800
-    autos_esperados = n_lote * prob_13_16
+def _(area_between, mu, sigma):
+    z_p5_1 = (13 - mu) / sigma
+    z_p5_2 = (16 - mu) / sigma
+    prob = area_between(z_p5_1, z_p5_2)
+    print("Esperados:", prob * 800)
+    return prob, z_p5_1, z_p5_2
 
-    print(f"Z-score para 13 s: {z_13_ap:.4f}")
-    print(f"Z-score para 16 s: {z_16_ap:.4f}")
-    print(f"Probabilidad P(13 ≤ acceleration ≤ 16): {prob_13_16:.4f} ({prob_13_16 * 100:.2f}%)")
-    print(f"Automóviles esperados en lote de {n_lote}: {autos_esperados:.2f} (~{round(autos_esperados)} automóviles)")
-    print(f"\nExplicación: Por la linealidad de la esperanza matemática E[X] = N * P, se multiplica el tamaño del lote (800) por la probabilidad del intervalo ({prob_13_16:.4f}).")
 
-    area_between(z_13_ap, z_16_ap)
-    return autos_esperados, n_lote, prob_13_16, z_13_ap, z_16_ap
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    *Respuesta:*
+
+    Aproximadamente 309 automoviles (0.3864 * 800 = 309.1). Convierto la probabilidad multiplicando la probabilidad que obtuvimos del area entre 13 y 16 segundos por el total de autos del lote (800).
+    """)
+    return
 
 
 @app.cell(hide_code=True)
@@ -557,12 +524,21 @@ def _(mo):
 
 
 @app.cell
-def _(mu_acc, sigma_acc, stats):
-    # Mejor aceleración implica menor tiempo en alcanzar las 60 mph: Percentil 10 (P10)
-    tiempo_max_calificar = stats.norm.ppf(0.10, loc=mu_acc, scale=sigma_acc)
-    print(f"Percentil 10 (P10 - Tiempo Máximo Top 10% Rápido): {tiempo_max_calificar:.4f} segundos (~{tiempo_max_calificar:.2f} s)")
-    print(f"Para calificar a la categoría especial, un automóvil debe tardar como máximo {tiempo_max_calificar:.2f} segundos en acelerar de 0 a 60 mph.")
-    return (tiempo_max_calificar,)
+def _(mu, sigma, stats):
+    z_p6 = stats.norm().ppf(0.10)
+    x_p6 = mu + (z_p6 * sigma)
+    print(x_p6)
+    return x_p6, z_p6
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    *Respuesta:*
+
+    El tiempo maximo para calificar es de aproximadamente 12.03 segundos.
+    """)
+    return
 
 
 @app.cell(hide_code=True)
@@ -572,12 +548,7 @@ def _(mo):
 
     *Respuesta:*
 
-    el modelo de distribución normal es **muy apropiado como aproximación empírica univariada**, ya que los tiempos de aceleración se distribuyen de forma notablemente simétrica en torno a los 15.57 segundos y se ajustan con gran fidelidad a la recta en el gráfico q-q.
-
-    sin embargo, presenta **limitaciones físicas y operativas clave**:
-    1. **soporte infinito vs naturaleza estrictamente positiva ($t > 0$)**: la normal asigna probabilidad a valores negativos ($t < 0$), lo que es físicamente imposible. aunque para $\mu=15.57$ y $\sigma=2.76$ el valor 0 está a más de 5.6 desviaciones estándar ($P(X < 0) \approx 10^{-8}$), formalmente el soporte no está acotado.
-    2. **límites biomecánicos y de fricción**: ningún automóvil de combustión de la época podía acelerar en 0 o 1 segundo por límites de adherencia neumática y masa.
-    3. **reducción univariada**: la aceleración depende físicamente de una relación no lineal multivariada (potencia, torque, peso, aerodinámica y relación de transmisión). modelarla con una única gaussiana ignora estas interacciones físicas directas.
+    Considero que el modelo de distribución normal si es apropiado para modelar la aceleración de los automoviles, pues al ser datos continuos se adaptan mejor a este modelo y los datos son bastante simetricos. Una de las limitaciones que puede tener es que en la distribucion normal existen valores negativos, pero en la vida real el tiempo de aceleracion siempre es un numero positivo.
     """)
     return
 
