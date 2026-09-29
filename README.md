@@ -3,73 +3,77 @@
 > **Autor:** Ibrahim García (`ultimaibrahim`)  
 > **Profesor:** Iván Alejandro Toledano Juárez (`IvTole`)  
 > **Semestre:** 2026B — Aula N 105 (09:00 - 11:00 AM)  
-> **Plataformas:** [MoLab Cloud](https://molab.marimo.io) & Jupyter Notebook  
+> **Archivo Autorizado:** [`MAT_Examen1_V2.py`](https://github.com/IvTole/Matematicas_Aplicadas_Ciencia_De_Datos_CUGDL/blob/main/examen_1/MAT_Examen1_V2.py)  
+> **Dataset Oficial:** `mpg.csv` (Auto MPG — variable objetivo: `acceleration` en segundos)
 
 ---
 
-## 🎯 Acceso Rápido y Modos de Uso
+## 🚀 Entregables del Examen 1 — Versión 2
 
-### Opción 1: Abrir en MoLab (`molab.marimo.io`)
+| Archivo | Descripción | Uso en el Aula |
+| :--- | :--- | :--- |
+| **[`GarciaSaul-Examen1-V2.py`](GarciaSaul-Examen1-V2.py)** | **Archivo oficial de entrega para Classroom** según la regla de nomenclatura del profesor | Subir directamente |
+| **[`MAT_Examen1_V2.py`](MAT_Examen1_V2.py)** | Script Marimo resuelto con nombre estándar para MoLab | Importar en MoLab |
+| **[`MAT_Examen1_V2_RESUELTO.py`](MAT_Examen1_V2_RESUELTO.py)** | Copia explícita idéntica resuelta a 0 errores | MoLab / Local |
+| **[`MAT_Examen1_V2_RESUELTO.html`](MAT_Examen1_V2_RESUELTO.html)** | Reporte interactivo offline autónomo para navegador | Visor de rescate |
+| **[`MAT_Examen1_V2_RESUELTO_SaulGarcia.ipynb`](MAT_Examen1_V2_RESUELTO_SaulGarcia.ipynb)** | Notebook Jupyter ejecutado con 40 celdas y gráficos | Jupyter / VS Code |
+| **[`mpg.csv`](mpg.csv)** | Dataset de automóviles ubicado en la raíz | Lectura automática |
+| **[`acordeon_examen_macd.md`](acordeon_examen_macd.md)** | Cheat sheet de bolsillo con valores exactos y respuestas | Consulta relámpago |
+
+---
+
+## 📊 Tabla Maestra de Respuestas Numéricas (`MAT_Examen1_V2.py`)
+
+| Inciso | Parámetro / Pregunta | Expresión / Código | Valor Exacto | Unidades |
+| :--- | :--- | :--- | :---: | :---: |
+| **1. a** | Media ($\mu$) | `df['acceleration'].mean()` | **`15.5681`** | **segundos** |
+| **1. a** | Mediana | `df['acceleration'].median()` | **`15.5000`** | **segundos** |
+| **1. a** | Moda | `df['acceleration'].mode()[0]` | **`14.5000`** | **segundos** |
+| **1. b** | Desviación Estándar ($s$) | `df['acceleration'].std()` | **`2.7577`** | **segundos** |
+| **1. b** | Varianza ($s^2$) | `df['acceleration'].var()` | **`7.6048`** | **segundos²** |
+| **1. b** | Cuartil 1 ($Q_1$) | `df['acceleration'].quantile(0.25)` | **`13.8250`** | **segundos** |
+| **1. b** | Cuartil 3 ($Q_3$) | `df['acceleration'].quantile(0.75)` | **`17.1750`** | **segundos** |
+| **1. b** | Rango Intercuartílico (IQR) | $Q_3 - Q_1$ | **`3.3500`** | **segundos** |
+| **Vis. b** | Outliers en Boxplot (Tukey) | $[Q_1 - 1.5 IQR, Q_3 + 1.5 IQR]$ | **7 outliers** (`[8.0, 8.5, 8.5, 23.5, 23.7, 24.6, 24.8]`) | **segundos** |
+| **Vis. c** | Relación `weight` vs `acceleration` | `df['weight'].corr(df['acceleration'])` | **`r = -0.4175`** (Moderada negativa) | Adimensional |
+| **Dist. b** | Comparación Media vs Mediana | Diferencia $\mu - \text{Mediana}$ | **$\approx 0$** ($15.57 \approx 15.50$, simétrica) | **segundos** |
+| **Gauss. a** | Parámetros Normal $\mathcal{N}(\mu, \sigma^2)$ | Media y Desv. Estándar | **$\mu = 15.5681\text{ s}, \sigma = 2.7577\text{ s}$** | **segundos** |
+| **Prob. a** | $P(\text{acceleration} < 13)$ | `stats.norm.cdf(13, mu, sigma)` | **`0.1759` (17.59%)** · $Z = -0.9312$ | Probabilidad |
+| **Prob. b** | $P(15 \le \text{acceleration} \le 19)$ | `cdf(19) - cdf(15)` | **`0.4749` (47.49%)** · $Z_1=-0.21, Z_2=1.24$ | Probabilidad |
+| **Prob. c** | Aceleración Lenta (20% mayores tiempos) | `stats.norm.ppf(0.80, mu, sigma)` | **`17.8890` ($\approx 17.89\text{ s}$)** | **segundos** |
+| **Prob. d** | $P(\text{acceleration} > 17)$ | `1 - stats.norm.cdf(17, mu, sigma)` | **`0.3018` (30.18%)** · $Z = 0.5192$ | Probabilidad |
+| **Aplic. a** | Esperados entre 13 y 16 s en lote de 800 | $800 \times P(13 \le X \le 16)$ | **`309.09` ($\approx 309$ automóviles)** ($P=38.64\%$) | Automóviles |
+| **Aplic. b** | Revista Top 10% Rápido (menor tiempo) | `stats.norm.ppf(0.10, mu, sigma)` | **`12.0340` ($\approx 12.03\text{ s}$)** | **segundos** |
+
+---
+
+## 📝 Respuestas Conceptuales de Examen (Listas para Copiar)
+
+- **1. c) Interpretación EDA**:
+  > el tiempo promedio de aceleración es de 15.57 segundos con mediana de 15.50 s y moda de 14.50 s. la dispersión es moderada (desviación estándar de 2.76 s e iqr de 3.35 s), concentrándose el 50% central entre 13.83 y 17.18 segundos. refleja un conjunto automotriz con desempeño homogéneo centrado en los 15.5 s, con ligeras colas derivadas de la disparidad entre compactos y sedanes de la época.
+
+- **Vis. b) Outliers**:
+  > bajo la regla de tukey ($1.5 \times \text{IQR}$, límites $[8.80, 22.20]$ s), existen **7 outliers estadísticos**: 3 vehículos de aceleración rápida en la cola inferior (`[8.0, 8.5, 8.5]` s) y 4 vehículos lentos en la cola superior (`[23.5, 23.7, 24.6, 24.8]` s).
+
+- **Vis. c) Relación Peso vs Aceleración**:
+  > correlación lineal negativa moderada ($r = -0.4175$). a mayor peso del automóvil, menor tiempo en segundos para alcanzar 60 mph. históricamente, los autos más pesados montaban motores v8 potentes con gran torque, permitiéndoles acelerar en menos segundos que los autos pequeños y ligeros de baja cilindrada.
+
+- **Dist. a) y b) Simetría**:
+  > la distribución es **aproximadamente simétrica con un leve sesgo positivo a la derecha**. la media (15.57 s) y la mediana (15.50 s) son prácticamente idénticas ($\Delta = 0.068$ s, diferencia menor al 0.4%), lo que ratifica la simetría central con un estiramiento mínimo en la cola derecha por los 4 autos muy lentos.
+
+- **Gauss. c) Gráfico Q-Q**:
+  > los datos siguen aproximadamente una distribución normal de manera muy satisfactoria. entre los cuantiles teóricos -2 y +2, los puntos se adhieren casi con precisión milimétrica a la recta roja de 45°. únicamente en el extremo superior derecho (cuantiles > 2.5) los vehículos más lentos se dispersan levemente, pero el ajuste general es de alta calidad para fines inferenciales.
+
+- **Aplic. c) Reflexión Crítica y Limitaciones**:
+  > el modelo gaussiano es una excelente aproximación univariada por la simetría de los datos, pero presenta 3 limitaciones físicas:
+  > 1. *soporte no acotado*: asigna probabilidades a tiempos negativos ($t < 0$), físicamente imposibles.
+  > 2. *límites biomecánicos y de adherencia*: ningún auto de combustión puede acelerar en 0 o 1 s por fricción de neumáticos y potencia.
+  > 3. *simplificación univariada*: la aceleración en la física automotriz depende de una relación no lineal multivariada (torque, caballos de fuerza, masa, relación de diferencial y aerodinámica) que no puede ser capturada por una única variable aislada.
+
+---
+
+## 🛠️ Cómo Abrir en MoLab (`molab.marimo.io`)
 1. Entra a [molab.marimo.io](https://molab.marimo.io/).
-2. Haz clic en **Upload / Import** y selecciona [`examen_student_performance.py`](examen_student_performance.py) de este repositorio.
-3. Sube también [`student-mat.csv`](student-mat.csv) al workspace de MoLab (o en el mismo directorio).
-4. ¡El notebook reactivo se ejecutará automáticamente con todas las celdas, gráficos y respuestas ya resueltas!
-
-### Opción 2: Ver Offline en el Navegador
-- Abre [`examen_student_performance_RESUELTO.html`](examen_student_performance_RESUELTO.html) en Chrome, Brave, Firefox o Edge para interactuar con el reporte completo sin necesidad de conexión.
-
-### Opción 3: Ejecución Local con Marimo o Jupyter
-```bash
-# Con Marimo
-pip install marimo
-marimo run examen_student_performance.py
-# o en modo edición
-marimo edit examen_student_performance.py
-
-# Con Jupyter Notebook
-jupyter notebook examen_student_performance_RESUELTO_SaulGarcia.ipynb
-```
-
----
-
-## 📊 Tabla Maestra de Respuestas Numéricas (`student-mat.csv`)
-
-| Inciso | Parámetro / Pregunta | Expresión / Código | Valor Exacto | Interpretación Resumida |
-| :--- | :--- | :--- | :---: | :--- |
-| **1.1 a** | Media ($\mu$) | `df['G3'].mean()` | **`10.4152`** | Desempeño justo en el límite aprobatorio institucional (10/20) |
-| **1.1 a** | Mediana | `df['G3'].median()` | **`11.0000`** | 50% de la cohorte obtiene $\le 11$ y 50% $\ge 11$ |
-| **1.1 a** | Moda | `df['G3'].mode()[0]` | **`10`** | Calificación modal más repetida |
-| **1.1 b** | Desviación Estándar ($s$) | `df['G3'].std()` | **`4.5814`** | Alta dispersión en las calificaciones |
-| **1.1 b** | Varianza ($s^2$) | `df['G3'].var()` | **`20.9896`** | Variabilidad cuadrática muestral ($ddof=1$) |
-| **1.1 b** | Cuartil 1 ($Q_1$) | `df['G3'].quantile(0.25)` | **`8.00`** | 25% de alumnos con nota $\le 8$ |
-| **1.1 b** | Cuartil 3 ($Q_3$) | `df['G3'].quantile(0.75)` | **`14.00`** | 75% de alumnos con nota $\le 14$ |
-| **1.1 b** | Rango Intercuartílico (IQR) | $Q_3 - Q_1$ | **`6.00`** | El 50% central se ubica entre 8 y 14 puntos |
-| **1.2 b** | Outliers Boxplot (Tukey) | $[Q_1 - 1.5 IQR, Q_3 + 1.5 IQR]$ | **`0 outliers`** | Límites $[-1, 23]$. Escala de 0 a 20. Hay 38 notas en cero |
-| **1.2 c** | Correlación $G2$ vs $G3$ | `df['G2'].corr(df['G3'])` | **`r = 0.9049`** | Correlación lineal positiva sumamente fuerte |
-| **2.1 a** | Parámetros Normal $\mathcal{N}(\mu, \sigma^2)$ | Media y Desv. Estándar | **$\mu = 10.42, \sigma = 4.58$** | Parámetros del modelo continuo |
-| **2.2 a** | $P(G3 > 15)$ | `1 - stats.norm.cdf(15, mu, sigma)` | **`0.1585` (15.85%)** | $Z = 1.0007$ · `area_cdf_c(z)` |
-| **2.2 b** | $P(10 \le G3 \le 14)$ | `cdf(14) - cdf(10)` | **`0.3191` (31.91%)** | $Z_1 = -0.0906, Z_2 = 0.7825$ · `area_between(z1, z2)` |
-| **2.2 c** | Percentil 75 ($P_{75}$) | `stats.norm.ppf(0.75, mu, sigma)` | **`13.51 puntos`** | El 75% de alumnos obtiene $\le 13.51$ puntos |
-| **2.2 d** | Límite Riesgo (Percentil 25) | `stats.norm.ppf(0.25, mu, sigma)` | **`7.33 puntos`** | Alumnos con nota $\le 7.33$ están en riesgo |
-| **2.2 e** | Probabilidad Reprobar ($G3 < 10$) | `stats.norm.cdf(10, mu, sigma)` | **`0.4639` (46.39%)** | $Z = -0.0906$ · `area_cdf(z)` |
-| **2.3 a** | Esperados con $G3 > 16$ en $N=500$ | $500 \times P(G3 > 16)$ | **`55.71` ($\approx 56$ alumnos)** | $P(G3 > 16) = 0.1114$ ($Z = 1.2190$) |
-| **2.3 b** | Corte Tutorías (20% más bajo) | `stats.norm.ppf(0.20, mu, sigma)` | **`6.56 puntos`** | Alumnos con $G3 \le 6.56$ van a tutorías |
-
----
-
-## 📝 Respuestas Conceptuales de Bolsillo
-
-- **1.1 c) Desempeño General**: Promedio de 10.42 y mediana de 11.00 sobre 20. Desempeño apenas aprobatorio con alta dispersión ($s=4.58$, IQR$=6$), indicando gran heterogeneidad en el grupo.
-- **1.2 b) Outliers**: 0 outliers formales bajo la regla de Tukey ($1.5 \times \text{IQR}$) porque los límites son $[-1.0, 23.0]$ y las notas están acotadas en $[0, 20]$. No obstante, hay **38 ceros** por deserción/inasistencias al examen final.
-- **1.2 c) Relación G2 vs G3**: Correlación lineal positiva muy fuerte ($r=0.9049$). Buen rendimiento en G2 predice fielmente buen resultado en G3.
-- **1.3 a) y b) Distribución y Asimetría**: Sesgo leve a la izquierda ($\text{media} < \text{mediana}$, $10.42 < 11.00$). Los 38 ceros jalaron la media hacia abajo mientras que la mediana resistió el sesgo.
-- **2.1 c) Gráfico Q-Q**: Los datos se ajustan a la normal en el cuerpo central (cuantiles -1 a +1.5, notas de 6 a 16). Se desvían severamente en las colas por la inflación de 38 ceros abajo y el truncamiento en 20 arriba.
-- **2.3 c) Limitaciones del Modelo Normal**:
-  1. *Soporte infinito*: Asigna probabilidad teórica a notas $< 0$ y $> 20$.
-  2. *Inflación de ceros (zero-inflation)*: No modela la bimodalidad causada por deserción escolar.
-  3. *Discretitud*: Las calificaciones son números enteros, no continuos.
-
----
-
-## 🚗 Carpeta `variantes_cars/` (Blindaje Preventivo)
-Contiene las variantes `MAT_Examen1.py` y `MAT_Examen1_V2.py` con el dataset `mpg.csv` (`acceleration` y `weight`) por si en el aula se divide el salón por filas. Ver el acordeón en [`acordeon_examen_macd.md`](acordeon_examen_macd.md) para los números exactos de esas variantes.
+2. Sube [`MAT_Examen1_V2.py`](MAT_Examen1_V2.py) o [`GarciaSaul-Examen1-V2.py`](GarciaSaul-Examen1-V2.py).
+3. Sube también [`mpg.csv`](mpg.csv).
+4. El notebook reactivo corre automáticamente de principio a fin a 0 errores.
